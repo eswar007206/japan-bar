@@ -141,12 +141,48 @@ export async function fetchCustomerBill(readToken: string): Promise<CustomerBill
 /**
  * Fetch customer bill data by table_id (for permanent QR codes)
  * Returns null if no open bill exists for the table
+ *
+ * @param tableId - Format: "1-a1" (store_id-label, e.g., "1-a1", "2-b3")
  */
 export async function fetchCustomerBillByTable(tableId: string): Promise<CustomerBillResponse | null> {
+  // Parse tableId format: "1-a1" => store_id=1, label="A1"
+  const parts = tableId.split('-');
+  if (parts.length !== 2) {
+    console.error('Invalid table ID format:', tableId);
+    return null;
+  }
+
+  const storeId = parseInt(parts[0]);
+  const label = parts[1].toUpperCase(); // Convert to uppercase (a1 => A1)
+
+  if (isNaN(storeId)) {
+    console.error('Invalid store ID in table ID:', tableId);
+    return null;
+  }
+
+  // First, find the floor_tables UUID for this store/label combination
+  const { data: floorTable, error: tableError } = await supabase
+    .from('floor_tables')
+    .select('id')
+    .eq('store_id', storeId)
+    .eq('label', label)
+    .maybeSingle();
+
+  if (tableError) {
+    console.error('Error finding floor table:', tableError);
+    throw tableError;
+  }
+
+  if (!floorTable) {
+    console.warn('Floor table not found:', { storeId, label });
+    return null;
+  }
+
+  // Now query bills using the floor_tables UUID
   const { data: bill, error: billError } = await supabase
     .from('bills')
     .select(BILL_SELECT)
-    .eq('table_id', tableId)
+    .eq('table_id', floorTable.id)
     .eq('status', 'open')
     .maybeSingle();
 
