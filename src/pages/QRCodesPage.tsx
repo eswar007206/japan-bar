@@ -23,13 +23,14 @@ export default function QRCodesPage() {
 
   const baseUrl = window.location.origin;
 
-  // Store 1 tables
-  const store1CounterTables = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7'];
-  const store1SofaTables = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6'];
+  // Store 1 tables (15 total)
+  const store1ATables = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9']; // 9 tables
+  const store1BTables = ['B1', 'B2', 'B3']; // 3 tables
+  const store1CTables = ['C1', 'C2', 'C3']; // 3 tables
 
-  // Store 2 tables
-  const store2CounterTables = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'];
-  const store2SofaTables = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6'];
+  // Store 2 tables (10 total)
+  const store2ATables = ['A1', 'A2', 'A3', 'A4', 'A5']; // 5 tables
+  const store2BTables = ['B1', 'B2', 'B3', 'B4', 'B5']; // 5 tables
 
   const handlePrint = () => {
     window.print();
@@ -109,11 +110,11 @@ export default function QRCodesPage() {
         <div>
           <h2 className="text-xl font-bold mb-4">1号店 - テーブルQRコード</h2>
 
-          {/* Counter Tables */}
+          {/* A Tables */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">カウンター席</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">Aエリア (9席)</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {store1CounterTables.map((table) => {
+              {store1ATables.map((table) => {
                 const tableId = `1-${table.toLowerCase()}`;
                 const url = `${baseUrl}/table/${tableId}`;
                 return (
@@ -146,11 +147,48 @@ export default function QRCodesPage() {
             </div>
           </div>
 
-          {/* Sofa Tables */}
+          {/* B Tables */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">ソファ席</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">Bエリア (3席)</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {store1SofaTables.map((table) => {
+              {store1BTables.map((table) => {
+                const tableId = `1-${table.toLowerCase()}`;
+                const url = `${baseUrl}/table/${tableId}`;
+                return (
+                  <Card key={tableId} className="break-inside-avoid">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-center text-lg">1号店 {table}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center space-y-2">
+                      <QRCodeSVG
+                        id={`qr-${tableId}`}
+                        value={url}
+                        size={150}
+                        level="M"
+                        className="border-4 border-white"
+                      />
+                      <p className="text-xs text-center break-all font-mono">{url}</p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full print:hidden"
+                        onClick={() => downloadQR(tableId)}
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        保存
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* C Tables */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">Cエリア (3席)</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {store1CTables.map((table) => {
                 const tableId = `1-${table.toLowerCase()}`;
                 const url = `${baseUrl}/table/${tableId}`;
                 return (
@@ -188,11 +226,11 @@ export default function QRCodesPage() {
         <div className="page-break-before">
           <h2 className="text-xl font-bold mb-4">2号店 - テーブルQRコード</h2>
 
-          {/* Counter Tables */}
+          {/* A Tables */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">カウンター席</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">Aエリア (5席)</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {store2CounterTables.map((table) => {
+              {store2ATables.map((table) => {
                 const tableId = `2-${table.toLowerCase()}`;
                 const url = `${baseUrl}/table/${tableId}`;
                 return (
@@ -225,11 +263,11 @@ export default function QRCodesPage() {
             </div>
           </div>
 
-          {/* Sofa Tables */}
+          {/* B Tables */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">ソファ席</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">Bエリア (5席)</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {store2SofaTables.map((table) => {
+              {store2BTables.map((table) => {
                 const tableId = `2-${table.toLowerCase()}`;
                 const url = `${baseUrl}/table/${tableId}`;
                 return (
