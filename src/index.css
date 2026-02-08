@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Girls Bar Fairy - Luxury Customer Bill Design System
+   High-end, legible in dim bar lighting, large numeric display
+   All colors in HSL format */
+
+@layer base {
+  :root {
+    /* Primary palette - Warm cream and charcoal-purple */
+    --background: 36 33% 95%; /* #F8F4EC - warm cream */
+    --foreground: 270 18% 25%; /* #43334C - soft charcoal-purple */
+
+    /* Card surfaces - slightly warmer than background */
+    --card: 36 28% 92%;
+    --card-foreground: 270 18% 25%;
+
+    --popover: 36 28% 92%;
+    --popover-foreground: 270 18% 25%;
+
+    /* Primary accent - Deep rose for money/critical */
+    --primary: 336 80% 57%; /* #E83C91 - deep rose */
+    --primary-foreground: 36 33% 95%;
+
+    /* Secondary - Feminine pink for highlights */
+    --secondary: 340 100% 78%; /* #FF8FB7 - feminine pink */
+    --secondary-foreground: 270 18% 25%;
+
+    /* Muted tones */
+    --muted: 36 20% 88%;
+    --muted-foreground: 270 12% 45%;
+
+    /* Accent - Pink highlight */
+    --accent: 340 100% 78%;
+    --accent-foreground: 270 18% 25%;
+
+    /* States */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 36 33% 95%;
+
+    /* Borders and inputs */
+    --border: 36 15% 82%;
+    --input: 36 15% 82%;
+    --ring: 336 80% 57%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens for bill display */
+    --bill-total: 336 80% 57%; /* Deep rose for total amounts */
+    --bill-extension: 340 100% 78%; /* Feminine pink for extension preview */
+    --bill-time-warning: 336 80% 57%; /* Warning color for low time */
+    --bill-surface: 36 40% 97%; /* Lighter surface for bill card */
+    --bill-divider: 36 20% 85%;
+    
+    /* Typography scale for bill display */
+    --font-display: 'Noto Sans JP', sans-serif;
+    
+    /* Sidebar (keeping defaults) */
+    --sidebar-background: 36 33% 95%;
+    --sidebar-foreground: 270 18% 25%;
+    --sidebar-primary: 336 80% 57%;
+    --sidebar-primary-foreground: 36 33% 95%;
+    --sidebar-accent: 340 100% 78%;
+    --sidebar-accent-foreground: 270 18% 25%;
+    --sidebar-border: 36 15% 82%;
+    --sidebar-ring: 336 80% 57%;
+  }
+
+  .dark {
+    /* Dark mode - Dim bar lighting optimized */
+    --background: 270 15% 12%; /* Deep purple-black */
+    --foreground: 36 33% 95%; /* Warm cream text */
+
+    --card: 270 12% 16%;
+    --card-foreground: 36 33% 95%;
+
+    --popover: 270 12% 16%;
+    --popover-foreground: 36 33% 95%;
+
+    --primary: 336 80% 62%;
+    --primary-foreground: 270 15% 12%;
+
+    --secondary: 340 100% 78%;
+    --secondary-foreground: 270 15% 12%;
+
+    --muted: 270 10% 22%;
+    --muted-foreground: 36 20% 70%;
+
+    --accent: 340 100% 78%;
+    --accent-foreground: 270 15% 12%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 36 33% 95%;
+
+    --border: 270 10% 25%;
+    --input: 270 10% 25%;
+    --ring: 336 80% 62%;
+
+    --bill-total: 336 80% 65%;
+    --bill-extension: 340 100% 80%;
+    --bill-time-warning: 336 85% 65%;
+    --bill-surface: 270 12% 18%;
+    --bill-divider: 270 10% 28%;
+
+    --sidebar-background: 270 15% 12%;
+    --sidebar-foreground: 36 33% 95%;
+    --sidebar-primary: 336 80% 62%;
+    --sidebar-primary-foreground: 270 15% 12%;
+    --sidebar-accent: 340 100% 78%;
+    --sidebar-accent-foreground: 270 15% 12%;
+    --sidebar-border: 270 10% 25%;
+    --sidebar-ring: 336 80% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: var(--font-display);
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+  /* Bill display typography */
+  .bill-total-display {
+    @apply text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight;
+    color: hsl(var(--bill-total));
+    font-feature-settings: 'tnum' 1;
+    letter-spacing: -0.02em;
+  }
+
+  .bill-extension-display {
+    @apply text-3xl sm:text-4xl font-semibold;
+    color: hsl(var(--bill-extension));
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bill-time-label {
+    @apply text-sm font-medium uppercase tracking-widest;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .bill-time-value {
+    @apply text-2xl sm:text-3xl font-semibold tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bill-time-warning {
+    color: hsl(var(--bill-time-warning));
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .bill-card {
+    background: hsl(var(--bill-surface));
+    @apply rounded-2xl shadow-lg;
+  }
+
+  .bill-divider {
+    background: hsl(var(--bill-divider));
+    @apply h-px w-full;
+  }
+}
+
+@layer utilities {
+  /* Pulse animation for time warning */
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  /* Fade in animation for extension preview */
+  @keyframes fade-slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-slide-in {
+    animation: fade-slide-in 0.4s ease-out forwards;
+  }
+
+  /* Offline warning animation */
+  @keyframes soft-pulse {
+    0%, 100% {
+      opacity: 0.9;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .animate-soft-pulse {
+    animation: soft-pulse 3s ease-in-out infinite;
+  }
+}
