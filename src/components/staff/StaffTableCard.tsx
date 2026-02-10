@@ -16,10 +16,18 @@ import {
   AlertTriangle,
   ChevronRight 
 } from 'lucide-react';
-import { formatJPY } from '@/types/billing';
+import { formatJPY, calculateCardTaxAmount, isCardTaxApplicable } from '@/types/billing';
 import type { FloorTable } from '@/types/cast';
 import type { TableSession } from '@/types/staff';
 import { SEATING_TYPE_LABELS } from '@/types/staff';
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  cash: '現金',
+  card: 'カード',
+  qr: 'QR決済',
+  contactless: 'タッチ',
+  split: '現金+カード',
+};
 
 interface TableWithSession extends FloorTable {
   bill?: TableSession | null;
@@ -84,17 +92,35 @@ export default function StaffTableCard({
                 <Clock className={`h-3.5 w-3.5 ${isOverdue ? 'text-destructive' : isLowTime ? 'text-orange-500' : 'text-muted-foreground'}`} />
                 <span className={`text-sm font-medium ${isOverdue ? 'text-destructive font-bold' : isLowTime ? 'text-orange-500' : ''}`}>
                   {isOverdue
-                    ? `${Math.abs(session.remaining_minutes!)}分 超過`
+                    ? `-${Math.abs(session.remaining_minutes!)}分`
                     : `残 ${session.remaining_minutes}分`
                   }
                 </span>
                 {isOverdue && <AlertTriangle className="h-3.5 w-3.5 text-destructive animate-pulse" />}
               </div>
 
-              {/* Amount */}
-              <div className="text-lg font-bold text-primary">
-                {formatJPY(session.current_total || 0)}
-              </div>
+              {/* Amount - colored based on payment method */}
+              {(() => {
+                const pm = session.payment_method;
+                const baseAmount = session.current_total || 0;
+                const hasCardTax = isCardTaxApplicable(pm as any);
+                const displayAmount = hasCardTax ? calculateCardTaxAmount(baseAmount) : baseAmount;
+                const amountColor = pm && pm !== 'cash' ? 'text-red-600' : 'text-foreground';
+
+                return (
+                  <div>
+                    <div className={`text-lg font-bold ${amountColor}`}>
+                      {formatJPY(displayAmount)}
+                    </div>
+                    {pm && (
+                      <div className={`text-[10px] font-medium ${pm !== 'cash' ? 'text-red-500' : 'text-muted-foreground'}`}>
+                        {PAYMENT_METHOD_LABELS[pm] || pm}
+                        {hasCardTax && ' (税込)'}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Extension count indicator (for auto-upgrade tracking) */}
               {session.seating_type === 'free' && session.extension_count !== undefined && session.extension_count > 0 && (

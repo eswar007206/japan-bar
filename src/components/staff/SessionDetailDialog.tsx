@@ -34,7 +34,7 @@ import {
   History,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { formatJPY } from '@/types/billing';
+import { formatJPY, calculateCardTaxAmount, isCardTaxApplicable } from '@/types/billing';
 import { useBillOrdersStaff, useCancelOrder, useExtendSession, useBillAdjustments, useAddAdjustment, useCancelSession, useAssignCast, useUnassignCast, useActiveCasts } from '@/hooks/useStaffData';
 import { useStaffAuth } from '@/contexts/StaffAuthContext';
 import { toast } from 'sonner';
@@ -245,16 +245,34 @@ export default function SessionDetailDialog({
             <p className="text-xs text-muted-foreground">残り時間</p>
             <p className={`text-lg font-bold ${session.remaining_minutes! <= 0 ? 'text-destructive animate-pulse' : session.remaining_minutes! <= 5 ? 'text-destructive' : ''}`}>
               {session.remaining_minutes! <= 0
-                ? `${Math.abs(session.remaining_minutes!)}分超過`
+                ? `-${Math.abs(session.remaining_minutes!)}分`
                 : `${session.remaining_minutes}分`
               }
             </p>
           </div>
           <div className="rounded-lg bg-muted/50 p-3 text-center">
             <p className="text-xs text-muted-foreground">合計金額</p>
-            <p className="text-lg font-bold text-primary">
-              {formatJPY((session.current_total || 0) + totalAdjustment)}
-            </p>
+            {(() => {
+              const pm = session.payment_method;
+              const baseAmount = (session.current_total || 0) + totalAdjustment;
+              const hasCardTax = isCardTaxApplicable(pm as any);
+              const displayAmount = hasCardTax ? calculateCardTaxAmount(baseAmount) : baseAmount;
+              const amountColor = pm && pm !== 'cash' ? 'text-red-600' : 'text-primary';
+
+              return (
+                <>
+                  <p className={`text-lg font-bold ${amountColor}`}>
+                    {formatJPY(displayAmount)}
+                  </p>
+                  {pm && (
+                    <p className={`text-[10px] font-medium ${pm !== 'cash' ? 'text-red-500' : 'text-muted-foreground'}`}>
+                      {pm === 'cash' ? '現金' : pm === 'card' ? 'カード' : pm === 'qr' ? 'QR決済' : pm === 'contactless' ? 'タッチ' : pm === 'split' ? '現金+カード' : pm}
+                      {hasCardTax && ' (税込)'}
+                    </p>
+                  )}
+                </>
+              );
+            })()}
             {totalAdjustment !== 0 && (
               <p className={`text-[10px] ${totalAdjustment < 0 ? 'text-destructive' : 'text-green-600'}`}>
                 {totalAdjustment > 0 ? '+' : ''}{formatJPY(totalAdjustment)}

@@ -30,15 +30,15 @@ export function TotalAmountDisplay({ amount, paymentMethod }: TotalAmountDisplay
         {formatJPY(displayAmount)}
       </p>
       {paymentMethod && (
-        <p className={`mt-1 text-sm font-medium ${hasCardTax ? 'text-red-500' : 'text-muted-foreground'}`}>
+        <p className={`mt-2 text-base font-semibold ${hasCardTax ? 'text-red-500' : 'text-muted-foreground'}`}>
           {PAYMENT_METHOD_LABELS[paymentMethod]}
           {hasCardTax && (
-            <span className="ml-2 text-xs">（カード税 10%）</span>
+            <span className="ml-2 text-sm font-normal">（カード税 10%）</span>
           )}
         </p>
       )}
       {hasCardTax && (
-        <p className="mt-0.5 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           元の金額: {formatJPY(amount)}
         </p>
       )}

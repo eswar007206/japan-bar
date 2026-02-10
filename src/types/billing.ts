@@ -14,6 +14,7 @@ export interface CustomerOrderItem {
 }
 
 export interface CustomerBillResponse {
+  bill_id: string; // UUID of the bill record
   store_id: number;
   store_name: string;
   table_id: string;

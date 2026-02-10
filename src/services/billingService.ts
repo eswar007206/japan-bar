@@ -4,7 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { CustomerBillResponse, CustomerOrderItem, floorToNearest10 } from '@/types/billing';
+import { CustomerBillResponse, CustomerOrderItem, PaymentMethod, floorToNearest10 } from '@/types/billing';
 
 /**
  * Shared helper: build a CustomerBillResponse from a bill row + its orders
@@ -69,6 +69,7 @@ function buildBillResponse(
   const extensionPreviewTotal = floorToNearest10(baseTotal + Math.floor(extensionPreviewPrice * 1.2));
 
   return {
+    bill_id: bill.id,
     store_id: bill.store_id,
     store_name: store?.name || 'Girls Bar Fairy',
     table_id: bill.table_id,
@@ -224,4 +225,17 @@ export async function fetchCustomerBillAPI(readToken: string): Promise<CustomerB
  */
 export async function fetchCustomerBillByTableAPI(tableId: string): Promise<CustomerBillResponse | null> {
   return fetchCustomerBillByTable(tableId);
+}
+
+/**
+ * Update payment method on an open bill
+ * Used by customer and cast screens to select payment method
+ */
+export async function updateBillPaymentMethod(billId: string, paymentMethod: PaymentMethod): Promise<void> {
+  const { error } = await supabase.rpc('update_bill_payment_method' as any, {
+    p_bill_id: billId,
+    p_payment_method: paymentMethod,
+  });
+
+  if (error) throw error;
 }

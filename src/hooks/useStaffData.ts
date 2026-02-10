@@ -142,6 +142,7 @@ export function useStaffFloorTables(storeId: number | null) {
           elapsed_minutes: elapsedMinutes,
           orders_count: billOrderCounts.get(bill.id) || 0,
           extension_count: billExtensionCounts.get(bill.id) || 0,
+          payment_method: bill.payment_method || null,
           assigned_casts: assignmentsByBill.get(bill.id) || [],
         };
 

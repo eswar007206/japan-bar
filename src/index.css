@@ -133,11 +133,18 @@
 
 @layer components {
   /* Bill display typography */
-  .bill-total-display {
-    @apply text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight;
-    color: hsl(var(--bill-total));
+  .bill-total-container {
+    @apply text-center py-4;
+  }
+
+  .bill-total-amount {
+    @apply text-6xl sm:text-7xl md:text-8xl font-bold tracking-tight;
     font-feature-settings: 'tnum' 1;
     letter-spacing: -0.02em;
+  }
+
+  .bill-total-amount.text-foreground {
+    color: hsl(var(--foreground));
   }
 
   .bill-extension-display {
@@ -211,5 +218,21 @@
 
   .animate-soft-pulse {
     animation: soft-pulse 3s ease-in-out infinite;
+  }
+
+  /* Pulsing border for overdue tables */
+  @keyframes pulse-border {
+    0%, 100% {
+      border-color: hsl(var(--destructive));
+      box-shadow: 0 0 0 0 hsla(var(--destructive), 0);
+    }
+    50% {
+      border-color: hsl(var(--destructive));
+      box-shadow: 0 0 8px 2px hsla(var(--destructive), 0.3);
+    }
+  }
+
+  .animate-pulse-border {
+    animation: pulse-border 2s ease-in-out infinite;
   }
 }

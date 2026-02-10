@@ -45,6 +45,7 @@ export interface TableSession {
   elapsed_minutes?: number;
   orders_count?: number;
   extension_count?: number;  // Track extension count for auto-upgrade
+  payment_method?: string | null; // Payment method selected by customer/cast/staff
   assigned_casts?: CastAssignment[];
 }
 

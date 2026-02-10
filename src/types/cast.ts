@@ -85,6 +85,8 @@ export interface Bill {
   close_time?: string;
   base_minutes: number;
   read_token?: string;
+  seating_type?: string;
+  payment_method?: string | null;
 }
 
 export interface Order {

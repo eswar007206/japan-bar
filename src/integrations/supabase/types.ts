@@ -860,7 +860,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "cast" | "staff"
       bill_status: "open" | "closed"
-      payment_method_type: "cash" | "card" | "qr" | "contactless" | "cancelled"
+      payment_method_type: "cash" | "card" | "qr" | "contactless" | "cancelled" | "split"
       product_category:
         | "set"
         | "extension"

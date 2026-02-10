@@ -1,6 +1,7 @@
 /**
  * Time Display Block Component
- * Shows start time, elapsed time, and remaining time
+ * Shows start time and remaining time
+ * Displays negative time as "-X分" with red warning styling
  */
 
 import { formatStartTime, formatMinutes } from '@/types/billing';
@@ -15,6 +16,7 @@ export function TimeDisplayBlock({
   startTime,
   remainingMinutes,
 }: TimeDisplayBlockProps) {
+  const isOverdue = remainingMinutes < 0;
   const isWarning = remainingMinutes <= 5;
 
   return (
@@ -30,7 +32,7 @@ export function TimeDisplayBlock({
         <p className="bill-time-label mb-1">残り時間</p>
         <p
           className={`bill-time-value ${
-            isWarning ? 'bill-time-warning' : ''
+            isOverdue ? 'text-destructive font-bold' : isWarning ? 'bill-time-warning' : ''
           }`}
         >
           {formatMinutes(remainingMinutes)}

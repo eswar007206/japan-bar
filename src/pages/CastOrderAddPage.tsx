@@ -16,13 +16,14 @@ import {
 } from '@/hooks/useCastData';
 import { useBillAdjustments } from '@/hooks/useStaffData';
 import { useRealtimeFloorTables } from '@/hooks/useRealtimeFloorTables';
+import { updateBillPaymentMethod } from '@/services/billingService';
 import { useCastAuth } from '@/contexts/CastAuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, ArrowLeft, Check, AlertCircle, Star, History } from 'lucide-react';
+import { Loader2, ArrowLeft, Check, AlertCircle, Star, History, Banknote, CreditCard, QrCode, Smartphone, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatJPY } from '@/types/billing';
+import { formatJPY, calculateCardTaxAmount, isCardTaxApplicable, type PaymentMethod } from '@/types/billing';
 import type { Product, ProductCategory } from '@/types/cast';
 import { CATEGORY_LABELS, CATEGORY_ORDER, isInHouseExtension, isDesignatedExtension, getBackForSeatingType } from '@/types/cast';
 import { ActivityLog } from '@/components/shared/ActivityLog';
@@ -110,6 +111,16 @@ export default function CastOrderAddPage() {
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('set');
   const [showLog, setShowLog] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+
+  // Sync selectedPaymentMethod with bill data
+  useEffect(() => {
+    if (bill?.payment_method) {
+      setSelectedPaymentMethod(bill.payment_method as PaymentMethod);
+    }
+  }, [bill?.payment_method]);
 
   // Redirect if not approved
   useEffect(() => {
@@ -167,6 +178,38 @@ export default function CastOrderAddPage() {
   const handleBack = () => {
     navigate(`/cast/store/${storeId}`);
   };
+
+  const handleSelectPaymentMethod = async (method: PaymentMethod) => {
+    if (!bill) return;
+    setIsUpdatingPayment(true);
+    setSelectedPaymentMethod(method);
+    try {
+      await updateBillPaymentMethod(bill.id, method);
+      toast.success(`お支払い方法: ${PAYMENT_METHOD_LABELS[method]}`);
+    } catch (error) {
+      console.error('Payment method update error:', error);
+      toast.error('お支払い方法の更新に失敗しました');
+      setSelectedPaymentMethod(bill.payment_method as PaymentMethod || null);
+    } finally {
+      setIsUpdatingPayment(false);
+    }
+  };
+
+  const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+    cash: '現金',
+    card: 'カード',
+    qr: 'QR決済',
+    contactless: 'タッチ決済',
+    split: '現金+カード',
+  };
+
+  const PAYMENT_METHODS: { method: PaymentMethod; icon: typeof Banknote; label: string }[] = [
+    { method: 'cash', icon: Banknote, label: '現金' },
+    { method: 'card', icon: CreditCard, label: 'カード' },
+    { method: 'qr', icon: QrCode, label: 'QR決済' },
+    { method: 'contactless', icon: Smartphone, label: 'タッチ決済' },
+    { method: 'split', icon: Wallet, label: '現金+カード' },
+  ];
 
   // Filter products by category
   const productsByCategory = CATEGORY_ORDER.reduce((acc, category) => {
@@ -228,7 +271,16 @@ export default function CastOrderAddPage() {
               </div>
               {bill ? (
                 <p className={`text-xs ${remainingMinutes <= 0 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
-                  合計: {formatJPY(displayTotal)} ｜ {remainingMinutes < 0 ? `-${Math.abs(remainingMinutes)}分` : `残${remainingMinutes}分`}
+                  合計: <span className={isCardTaxApplicable(selectedPaymentMethod) ? 'text-red-500 font-bold' : ''}>
+                    {formatJPY(isCardTaxApplicable(selectedPaymentMethod) ? calculateCardTaxAmount(displayTotal) : displayTotal)}
+                  </span>
+                  {isCardTaxApplicable(selectedPaymentMethod) && <span className="text-red-400 ml-1">(税込)</span>}
+                  {' '}｜ {remainingMinutes < 0 ? `-${Math.abs(remainingMinutes)}分` : `残${remainingMinutes}分`}
+                  {selectedPaymentMethod && (
+                    <span className={`ml-1 ${isCardTaxApplicable(selectedPaymentMethod) ? 'text-red-400' : 'text-muted-foreground'}`}>
+                      ｜ {PAYMENT_METHOD_LABELS[selectedPaymentMethod]}
+                    </span>
+                  )}
                 </p>
               ) : (
                 <p className="text-xs text-destructive">
@@ -306,6 +358,55 @@ export default function CastOrderAddPage() {
             </TabsContent>
           ))}
         </Tabs>
+      )}
+
+      {/* Payment Method Selection Panel */}
+      {bill && (
+        <div className="border-t border-border bg-card">
+          <button
+            className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+            onClick={() => setShowPayment(!showPayment)}
+          >
+            <span className="flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-primary" />
+              お支払い方法
+              {selectedPaymentMethod && (
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  isCardTaxApplicable(selectedPaymentMethod)
+                    ? 'bg-red-100 text-red-600'
+                    : 'bg-muted text-foreground'
+                }`}>
+                  {PAYMENT_METHOD_LABELS[selectedPaymentMethod]}
+                </span>
+              )}
+            </span>
+            <span className="text-xs text-muted-foreground">{showPayment ? '▲' : '▼'}</span>
+          </button>
+          {showPayment && (
+            <div className="px-4 pb-3 grid grid-cols-3 gap-2">
+              {PAYMENT_METHODS.map(({ method, icon: Icon, label }) => {
+                const isSelected = selectedPaymentMethod === method;
+                return (
+                  <button
+                    key={method}
+                    onClick={() => handleSelectPaymentMethod(method)}
+                    disabled={isUpdatingPayment}
+                    className={`flex flex-col items-center gap-1 rounded-lg px-2 py-2.5 text-xs font-medium transition-all
+                      ${isSelected
+                        ? 'bg-primary/15 border-2 border-primary text-primary'
+                        : 'bg-muted/50 border-2 border-transparent text-muted-foreground hover:bg-muted/80'
+                      }
+                      ${isUpdatingPayment ? 'opacity-50' : ''}
+                    `}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Bottom Panel: Recent Orders or Activity Log */}
