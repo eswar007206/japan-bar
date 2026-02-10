@@ -32,6 +32,7 @@ import {
   CreditCard,
   QrCode,
   Smartphone,
+  Wallet,
   ChevronDown,
   ChevronUp,
   UserCheck,
@@ -497,6 +498,15 @@ export default function StaffDashboard() {
             >
               <Smartphone className="h-6 w-6" />
               <span className="text-sm">タッチ決済</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="col-span-2 h-20 flex-col gap-2"
+              onClick={() => handleConfirmEndSession('split')}
+              disabled={endSession.isPending}
+            >
+              <Wallet className="h-6 w-6" />
+              <span className="text-sm">現金+カード</span>
             </Button>
           </div>
         </DialogContent>

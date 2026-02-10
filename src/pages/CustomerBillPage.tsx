@@ -65,7 +65,7 @@ export default function CustomerBillPage() {
             <div className="bill-divider" />
 
             {/* Current total - largest display */}
-            <TotalAmountDisplay amount={data.current_total} />
+            <TotalAmountDisplay amount={data.current_total} paymentMethod={data.payment_method} />
 
             {/* Extension preview (conditional) */}
             {data.show_extension_preview && (

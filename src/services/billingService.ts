@@ -62,7 +62,7 @@ function buildBillResponse(
   });
 
   const totalMinutes = (bill.base_minutes || 60) + totalExtensionMinutes;
-  const remainingMinutes = Math.max(0, totalMinutes - elapsedMinutes);
+  const remainingMinutes = totalMinutes - elapsedMinutes;
 
   // Extension preview - estimate next extension cost
   const extensionPreviewPrice = 3000; // 40分フリー延長 base
@@ -85,6 +85,7 @@ function buildBillResponse(
     order_items: orderItems,
     seating_type: bill.seating_type || 'free',
     base_minutes: bill.base_minutes || 60,
+    payment_method: bill.payment_method || null,
   };
 }
 
@@ -97,6 +98,7 @@ const BILL_SELECT = `
   base_minutes,
   read_token,
   seating_type,
+  payment_method,
   stores (id, name),
   floor_tables (id, label)
 `;

@@ -21,7 +21,7 @@ export function useRealtimeFloorTables(storeId: number | null) {
         .select('*')
         .eq('store_id', storeId)
         .order('label');
-      
+
       if (tablesError) throw tablesError;
 
       // Get open bills with their totals
@@ -41,7 +41,7 @@ export function useRealtimeFloorTables(storeId: number | null) {
       // Calculate totals for each bill
       const tablesWithBillInfo = await Promise.all((tables as FloorTable[]).map(async (table) => {
         const bill = billsByTable.get(table.id);
-        
+
         if (!bill) {
           return { ...table, has_open_bill: false };
         }
@@ -72,7 +72,7 @@ export function useRealtimeFloorTables(storeId: number | null) {
         const startTime = new Date(bill.start_time);
         const now = new Date();
         const elapsedMinutes = Math.floor((now.getTime() - startTime.getTime()) / 60000);
-        const remainingMinutes = Math.max(0, (bill.base_minutes || 60) - elapsedMinutes);
+        const remainingMinutes = (bill.base_minutes || 60) - elapsedMinutes;
 
         return {
           ...table,

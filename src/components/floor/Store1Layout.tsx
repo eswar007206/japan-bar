@@ -28,6 +28,7 @@ function TableSeat({
 }) {
   const hasOpenBill = table.has_open_bill;
   const isLowTime = hasOpenBill && table.remaining_minutes !== undefined && table.remaining_minutes <= 5;
+  const isOverdue = hasOpenBill && table.remaining_minutes !== undefined && table.remaining_minutes < 0;
   
   // Extract seat number from label (e.g., "A1" -> "1")
   const seatNum = table.label.replace(/[A-Z]/g, '');
@@ -47,12 +48,12 @@ function TableSeat({
         }
         ${className}
       `}
-      title={hasOpenBill ? `${formatJPY(table.current_total || 0)} / 残${table.remaining_minutes}分` : table.label}
+      title={hasOpenBill ? `${formatJPY(table.current_total || 0)} / ${isOverdue ? `-${Math.abs(table.remaining_minutes!)}分` : `残${table.remaining_minutes}分`}` : table.label}
     >
       <span>{seatNum}</span>
       {hasOpenBill && (
         <span className="text-[8px] leading-none">
-          {table.remaining_minutes}分
+          {isOverdue ? `-${Math.abs(table.remaining_minutes!)}` : table.remaining_minutes}分
         </span>
       )}
     </button>

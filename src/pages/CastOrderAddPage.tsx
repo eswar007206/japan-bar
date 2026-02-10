@@ -192,7 +192,7 @@ export default function CastOrderAddPage() {
     const startTime = new Date(bill.start_time);
     const now = new Date();
     const elapsedMinutes = Math.floor((now.getTime() - startTime.getTime()) / 60000);
-    return Math.max(0, bill.base_minutes - elapsedMinutes);
+    return bill.base_minutes - elapsedMinutes;
   })() : 0;
 
   if (productsLoading || billLoading) {
@@ -227,8 +227,8 @@ export default function CastOrderAddPage() {
                 )}
               </div>
               {bill ? (
-                <p className="text-xs text-muted-foreground">
-                  合計: {formatJPY(displayTotal)} ｜ 残{remainingMinutes}分
+                <p className={`text-xs ${remainingMinutes <= 0 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                  合計: {formatJPY(displayTotal)} ｜ {remainingMinutes < 0 ? `-${Math.abs(remainingMinutes)}分` : `残${remainingMinutes}分`}
                 </p>
               ) : (
                 <p className="text-xs text-destructive">

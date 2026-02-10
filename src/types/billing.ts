@@ -3,7 +3,7 @@
  * Read-only customer QR page data structures
  */
 
-export type PaymentMethod = 'cash' | 'card' | 'qr' | 'contactless';
+export type PaymentMethod = 'cash' | 'card' | 'qr' | 'contactless' | 'split';
 
 export interface CustomerOrderItem {
   name_jp: string;
@@ -30,6 +30,7 @@ export interface CustomerBillResponse {
   order_items: CustomerOrderItem[]; // List of ordered items for customer display
   seating_type: string;
   base_minutes: number;
+  payment_method?: PaymentMethod | null; // Set when staff selects payment method
 }
 
 export interface BillDisplayState {
@@ -56,6 +57,31 @@ export interface QRParams {
  */
 export function floorToNearest10(amount: number): number {
   return Math.floor(amount / 10) * 10;
+}
+
+/**
+ * Ceil to nearest 100 yen
+ * Formula: ceil(amount / 100) * 100
+ */
+export function ceilToNearest100(amount: number): number {
+  return Math.ceil(amount / 100) * 100;
+}
+
+/**
+ * Calculate card tax amount
+ * Applies 10% surcharge and rounds UP to nearest ¥100
+ * Example: ¥16,500 → ¥16,500 × 1.1 = ¥18,150 → ¥18,200
+ */
+export function calculateCardTaxAmount(amount: number): number {
+  const withCardTax = amount * 1.1;
+  return ceilToNearest100(withCardTax);
+}
+
+/**
+ * Check if a payment method incurs card tax
+ */
+export function isCardTaxApplicable(method: PaymentMethod | null | undefined): boolean {
+  return method === 'card' || method === 'qr' || method === 'contactless' || method === 'split';
 }
 
 /**
@@ -104,5 +130,8 @@ export function formatStartTime(isoString: string): string {
  * e.g., 152 → "152分"
  */
 export function formatMinutes(minutes: number): string {
+  if (minutes < 0) {
+    return `-${Math.abs(minutes)}分`;
+  }
   return `${minutes}分`;
 }
