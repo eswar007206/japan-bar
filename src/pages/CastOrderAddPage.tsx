@@ -14,16 +14,18 @@ import {
   useBillDesignation,
   useCurrentShift
 } from '@/hooks/useCastData';
+import { useBillAdjustments } from '@/hooks/useStaffData';
 import { useRealtimeFloorTables } from '@/hooks/useRealtimeFloorTables';
 import { useCastAuth } from '@/contexts/CastAuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, ArrowLeft, Check, AlertCircle, Star } from 'lucide-react';
+import { Loader2, ArrowLeft, Check, AlertCircle, Star, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatJPY } from '@/types/billing';
 import type { Product, ProductCategory } from '@/types/cast';
 import { CATEGORY_LABELS, CATEGORY_ORDER, isInHouseExtension, isDesignatedExtension, getBackForSeatingType } from '@/types/cast';
+import { ActivityLog } from '@/components/shared/ActivityLog';
 
 // Check if product is any extension type
 function isExtensionProduct(product: Product): boolean {
@@ -100,12 +102,14 @@ export default function CastOrderAddPage() {
   const { data: products, isLoading: productsLoading } = useProducts();
   const { data: bill, isLoading: billLoading } = useTableBill(tableId || null);
   const { data: orders } = useBillOrders(bill?.id || null);
+  const { data: adjustments } = useBillAdjustments(bill?.id || null);
   const { data: designation } = useBillDesignation(bill?.id || null, castMember?.id || null);
   const { data: currentShift } = useCurrentShift(castMember?.id || null);
   const addOrder = useAddOrder();
 
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('set');
+  const [showLog, setShowLog] = useState(false);
 
   // Redirect if not approved
   useEffect(() => {
@@ -304,27 +308,46 @@ export default function CastOrderAddPage() {
         </Tabs>
       )}
 
-      {/* Recent Orders */}
+      {/* Bottom Panel: Recent Orders or Activity Log */}
       {bill && orders && orders.length > 0 && (
         <div className="border-t border-border bg-card p-4">
-          <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-            最近の追加 ({orders.length}件)
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {orders.slice(0, 8).map((order) => (
-              <span
-                key={order.id}
-                className="rounded-full bg-accent px-3 py-1 text-xs text-accent-foreground"
-              >
-                {order.product?.name_jp}
-              </span>
-            ))}
-            {orders.length > 8 && (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                +{orders.length - 8}件
-              </span>
-            )}
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-muted-foreground">
+              {showLog ? 'アクティビティログ' : `最近の追加 (${orders.length}件)`}
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setShowLog(!showLog)}
+            >
+              <History className="h-3 w-3 mr-1" />
+              {showLog ? 'オーダー表示' : 'ログ表示'}
+            </Button>
           </div>
+          {showLog ? (
+            <ActivityLog
+              orders={orders}
+              adjustments={adjustments || []}
+              maxHeight="200px"
+            />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {orders.filter(o => !o.is_cancelled).slice(0, 8).map((order) => (
+                <span
+                  key={order.id}
+                  className="rounded-full bg-accent px-3 py-1 text-xs text-accent-foreground"
+                >
+                  {order.product?.name_jp}
+                </span>
+              ))}
+              {orders.filter(o => !o.is_cancelled).length > 8 && (
+                <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                  +{orders.filter(o => !o.is_cancelled).length - 8}件
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

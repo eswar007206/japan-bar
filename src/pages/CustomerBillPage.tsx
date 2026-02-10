@@ -102,12 +102,6 @@ export default function CustomerBillPage() {
             <PaymentMethodIcons methods={data.accepted_payment_methods} />
           </div>
 
-          {/* Footer note */}
-          <div className="text-center pt-4">
-            <p className="text-sm text-muted-foreground">
-              {data.footer_note}
-            </p>
-          </div>
 
         </div>
       </div>

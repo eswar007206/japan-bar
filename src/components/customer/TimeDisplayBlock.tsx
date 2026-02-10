@@ -13,23 +13,16 @@ interface TimeDisplayBlockProps {
 
 export function TimeDisplayBlock({
   startTime,
-  elapsedMinutes,
   remainingMinutes,
 }: TimeDisplayBlockProps) {
   const isWarning = remainingMinutes <= 5;
 
   return (
-    <div className="grid grid-cols-3 gap-4 sm:gap-6">
+    <div className="grid grid-cols-2 gap-4 sm:gap-6">
       {/* Start Time */}
       <div className="text-center">
         <p className="bill-time-label mb-1">ご着席</p>
         <p className="bill-time-value">{formatStartTime(startTime)}</p>
-      </div>
-
-      {/* Elapsed Time */}
-      <div className="text-center">
-        <p className="bill-time-label mb-1">経過時間</p>
-        <p className="bill-time-value">{formatMinutes(elapsedMinutes)}</p>
       </div>
 
       {/* Remaining Time */}

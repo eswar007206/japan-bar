@@ -31,6 +31,7 @@ import {
   UserPlus,
   AlertTriangle,
   CheckCircle,
+  History,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatJPY } from '@/types/billing';
@@ -40,6 +41,7 @@ import { toast } from 'sonner';
 import type { FloorTable, Order } from '@/types/cast';
 import type { TableSession } from '@/types/staff';
 import { SEATING_TYPE_LABELS } from '@/types/staff';
+import { ActivityLog } from '@/components/shared/ActivityLog';
 
 interface TableWithSession extends FloorTable {
   bill?: TableSession | null;
@@ -443,7 +445,7 @@ export default function SessionDetailDialog({
 
         {/* Tabs */}
         <Tabs defaultValue="orders" className="flex-1">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="orders">
               <ShoppingBag className="h-3.5 w-3.5 mr-1" />
               オーダー ({activeOrders.length})
@@ -451,6 +453,10 @@ export default function SessionDetailDialog({
             <TabsTrigger value="casts">
               <Users className="h-3.5 w-3.5 mr-1" />
               キャスト ({session.assigned_casts?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="log">
+              <History className="h-3.5 w-3.5 mr-1" />
+              ログ
             </TabsTrigger>
           </TabsList>
 
@@ -594,6 +600,14 @@ export default function SessionDetailDialog({
                 </p>
               )}
             </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="log" className="mt-3">
+            <ActivityLog
+              orders={orders || []}
+              adjustments={adjustments || []}
+              maxHeight="200px"
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>
