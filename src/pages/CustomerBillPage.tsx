@@ -14,7 +14,6 @@ import { TimeDisplayBlock } from '@/components/customer/TimeDisplayBlock';
 import { TotalAmountDisplay } from '@/components/customer/TotalAmountDisplay';
 import { ExtensionPreview } from '@/components/customer/ExtensionPreview';
 import { PaymentMethodIcons } from '@/components/customer/PaymentMethodIcons';
-import { OrderListDisplay } from '@/components/customer/OrderListDisplay';
 import { OfflineWarning } from '@/components/customer/OfflineWarning';
 import { LoadingState } from '@/components/customer/LoadingState';
 import { NoSessionState } from '@/components/customer/NoSessionState';
@@ -72,14 +71,6 @@ export default function CustomerBillPage() {
               elapsedMinutes={data.elapsed_minutes}
               remainingMinutes={data.remaining_minutes}
             />
-
-            {/* Order items list */}
-            {data.order_items && data.order_items.length > 0 && (
-              <>
-                <div className="bill-divider" />
-                <OrderListDisplay items={data.order_items} />
-              </>
-            )}
 
             {/* Divider */}
             <div className="bill-divider" />
