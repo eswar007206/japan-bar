@@ -10,7 +10,6 @@
 import { useParams } from 'react-router-dom';
 import { useBillPolling } from '@/hooks/useBillPolling';
 import { BillHeader } from '@/components/customer/BillHeader';
-import { TimeDisplayBlock } from '@/components/customer/TimeDisplayBlock';
 import { TotalAmountDisplay } from '@/components/customer/TotalAmountDisplay';
 import { ExtensionPreview } from '@/components/customer/ExtensionPreview';
 import { PaymentMethodIcons } from '@/components/customer/PaymentMethodIcons';
@@ -60,16 +59,6 @@ export default function CustomerBillPage() {
             <BillHeader 
               storeName={data.store_name} 
               tableLabel={data.table_label} 
-            />
-
-            {/* Divider */}
-            <div className="bill-divider" />
-
-            {/* Time information */}
-            <TimeDisplayBlock
-              startTime={data.start_time}
-              elapsedMinutes={data.elapsed_minutes}
-              remainingMinutes={data.remaining_minutes}
             />
 
             {/* Divider */}
