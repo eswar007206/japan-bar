@@ -1,36 +1,40 @@
-# Girls Bar Fairy - Customer QR Bill Display
+# Kanpai - Japanese Bar Management System
 
-お客様向けリアルタイム会計表示システム
+**Customer QR Bill Display & Real-Time Accounting System**
 
-## 概要
+## 📖 What I Built & Why (Motivation)
 
-QRコードをスキャンすると、テーブルの現在の会計情報がリアルタイムで表示されます。
-このページは**読み取り専用**で、注文や操作は一切できません。
+In Japanese nightlife establishments like Izakayas, Girls Bars, or Hostess Clubs, billing can be complex due to time-based charges, service fees, and taxes. I built **Kanpai** to provide a real-time, transparent billing display system for customers. 
 
-## 機能
+The goal is to improve customer trust and streamline the checkout process. By simply scanning a QR code at their table, customers can securely view their current tab, elapsed time, and potential extension costs without ever needing to flag down the staff.
 
-- 店舗名・テーブル番号表示
-- ご着席時間・経過時間・残り時間表示
-- 現在の合計金額（税サ込み、10円単位切り捨て）
-- 延長プレビュー（残り5分以内に自動表示）
-- 対応決済方法アイコン表示
-- 8秒ごとの自動更新
-- オフライン警告表示
+## ✨ What It Does (Features)
 
-## API仕様
+- **Real-Time Billing Display:** Customers can see their current accounting information, including store name, table number, seating time, elapsed time, and time remaining.
+- **Automatic Calculations:** Displays the current total amount including tax (10%) and service charge (20%), automatically truncated down to the nearest 10 yen.
+- **Extension Preview:** Automatically displays the cost of a time extension when the remaining time is under 5 minutes.
+- **Payment Methods:** Visual icons for accepted payment methods (Cash, Card, QR, Contactless).
+- **Auto-Update:** The page refreshes data every 8 seconds.
+- **Read-Only Interface:** Customers can only view the bill; they cannot place orders or alter data, ensuring system integrity.
 
-### GET /customer/bill
+## ⚠️ Note on the `.env` File
 
-お客様向け会計情報を取得します。
+> **Why is the `.env` file in the repository?**
+> You might notice that the `.env` file containing Supabase credentials is included in this repo. **This is intentional.** This is a demo project, and it points to a dummy database. I kept the `.env` file here so that reviewers and testers can easily run the demo without losing the environment configuration. Rest assured, I know better than to commit real environment variables to public repositories!
 
-**パラメータ:**
-- `read_token` (string): テーブルごとの読み取り専用トークン
+## 🔧 API Specifications
 
-**レスポンス例:**
+### `GET /customer/bill`
+Retrieves the accounting information for the customer.
+
+**Parameters:**
+- `read_token` (string): A unique, read-only token generated per table.
+
+**Example Response:**
 ```json
 {
   "store_id": 1,
-  "store_name": "Girls Bar Fairy 1号店",
+  "store_name": "Girls Bar Fairy Branch 1",
   "table_id": "T3",
   "table_label": "A5",
   "start_time": "2026-02-03T21:00:00+09:00",
@@ -40,81 +44,33 @@ QRコードをスキャンすると、テーブルの現在の会計情報がリ
   "show_extension_preview": true,
   "extension_preview_total": 21500,
   "accepted_payment_methods": ["cash", "card", "qr", "contactless"],
-  "footer_note": "別途 税・サ20%",
+  "footer_note": "Tax & Service 20% separate",
   "last_updated": "2026-02-03T23:32:05+09:00"
 }
 ```
 
-## QRコード生成
+## 🧮 Calculation Rules
 
-QRコードには以下の情報を含めたURLをエンコードします：
+- **Tax & Service Charge:** 
+  - Consumption Tax: 10%
+  - Service Charge: 20%
+  - Total Multiplier: 1.20
+- **Rounding:** 
+  - The final display amount is **truncated to the nearest 10 yen**.
+  - Formula: `Math.floor(amount / 10) * 10`
+- **Extension Preview:** 
+  - Triggers automatically when 5 minutes or less remain.
+  - Adds the extension fee to the current total, applies tax/service charge, and truncates to the nearest 10 yen.
 
-```
-https://[ドメイン]/customer/{read_token}
-```
+## 💻 Tech Stack
 
-**read_token の生成:**
-1. テーブルごとに一意のトークンを生成
-2. 会計開始時に有効化
-3. 会計終了時に無効化
-4. 例: `store_id`_`table_id`_`ランダム文字列`
+- **Frontend:** React + TypeScript + Vite
+- **Styling:** TailwindCSS + shadcn-ui
+- **Typography:** Noto Sans JP Font
+- **Real-Time Data:** 8-second polling (expandable to WebSocket/SSE)
+- **Database:** Supabase (Dummy data for demo purposes)
 
-**生成例:**
-```javascript
-const readToken = `${storeId}_${tableId}_${crypto.randomUUID()}`;
-const qrUrl = `https://fairy-bar.example.com/customer/${readToken}`;
-```
-
-## 計算ルール
-
-### 税・サービス料
-- 消費税: 10%
-- サービス料: 20%
-- 合計乗数: 1.20
-
-### 端数処理
-- 最終表示金額は**10円単位で切り捨て**
-- 計算式: `Math.floor(amount / 10) * 10`
-
-### 延長プレビュー
-- 残り時間が5分以下で自動表示
-- 延長料金を加算後、税サ適用、10円切り捨て
-
-## デモURL
-
-- 通常表示: `/customer/demo-token-1`
-- 延長プレビュー表示: `/customer/demo-token-2`
-
-## 技術スタック
-
-- React + TypeScript
-- TailwindCSS
-- Noto Sans JP フォント
-- 8秒ポーリング（WebSocket/SSEに変更可能）
-
-## テスト
-
-```bash
-npm run test
-```
-
-計算ロジックのユニットテストは `src/test/billing.test.ts` に含まれています。
-
----
-
-## Project info
-
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
-
-## How can I edit this code?
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes.
+## 🚀 How to Run Locally
 
 ```sh
 # Step 1: Clone the repository
@@ -130,14 +86,10 @@ npm i
 npm run dev
 ```
 
-## Technologies
+## 🧪 Testing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## Deployment
-
-Open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+To run the calculation logic unit tests:
+```bash
+npm run test
+```
+Tests for billing logic are located in `src/test/billing.test.ts`.
